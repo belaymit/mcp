@@ -50,7 +50,7 @@ class MCPIntegrationChallenge {
     console.log(` Description: ${this.projectInfo.description}`);
     console.log(` Author: ${this.projectInfo.author}`);
     
-    console.log('\n🔧 Technologies Used:');
+    console.log('\n Technologies Used:');
     this.projectInfo.technologies.forEach(tech => {
       console.log(`  • ${tech}`);
     });
