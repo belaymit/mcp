@@ -1,240 +1,324 @@
 # Agent-to-Agent (A2A) Protocol Specification
 
-This document outlines the Agent-to-Agent communication protocol for secure and efficient inter-agent collaboration in the NexusAI ecosystem.
+This document provides a comprehensive specification for the Agent-to-Agent (A2A) protocol within the NexusAI ecosystem.
 
 ## Overview
 
-The A2A protocol enables different AI agents to discover, communicate, and collaborate with each other in a standardized manner. It addresses the need for agents built by different teams or using different frameworks to work together seamlessly.
+The Agent-to-Agent (A2A) protocol enables different AI agents to communicate, collaborate, and orchestrate complex workflows across distributed systems. While MCP focuses on agent-to-tool communication, A2A handles agent-to-agent interactions.
 
-## Core Principles
+## Protocol Foundation
 
-1. **Discoverability**: Agents can find and understand each other's capabilities
-2. **Interoperability**: Cross-framework and cross-platform communication
-3. **Security**: Secure authentication and authorization between agents
-4. **Scalability**: Efficient handling of multiple concurrent agent interactions
-5. **Reliability**: Robust error handling and failover mechanisms
+### Transport Layer
+- **Primary**: HTTP/HTTPS with REST-like endpoints
+- **Real-time**: WebSockets for persistent connections
+- **Asynchronous**: Server-Sent Events (SSE) for push notifications
+- **Fallback**: HTTP long-polling
 
-## Protocol Components
-
-### 1. Transport Layer
-
-#### HTTP/HTTPS
-- Primary transport for synchronous request-response patterns
-- RESTful API design with JSON payloads
-- Support for HTTP/2 for improved performance
-
-#### WebSockets
-- Real-time bidirectional communication
-- Event streaming and notifications
-- Connection persistence for ongoing collaborations
-
-#### Server-Sent Events (SSE)
-- Push notifications for asynchronous updates
-- Status updates and progress monitoring
-- Event streaming for reactive workflows
-
-### 2. Messaging Format
-
-#### JSON-RPC 2.0
-Primary message format for method invocations:
+### Message Format
+Based on JSON-RPC 2.0 with A2A-specific extensions:
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "agent.execute_task",
+  "method": "agent.task.execute",
   "params": {
-    "task_type": "data_analysis",
-    "input_data": "...",
-    "requirements": {}
+    "task_id": "task_123",
+    "agent_id": "agent_456",
+    "context": {...},
+    "metadata": {...}
   },
-  "id": "req_12345"
+  "id": "req_001"
 }
 ```
 
-#### Response Format
-```json
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "status": "completed",
-    "output": "...",
-    "metadata": {}
-  },
-  "id": "req_12345"
-}
-```
+## Core Concepts
 
-### 3. Agent Discovery
-
-#### Agent Cards
-Standardized agent capability descriptions:
+### Agent Discovery
+Agents register themselves with discovery service and publish "Agent Cards":
 
 ```json
 {
-  "agent_id": "task-analyzer-v1",
-  "name": "Task Analysis Agent",
-  "description": "Analyzes and categorizes task requirements",
+  "agent_id": "dev-assistant-v1",
+  "name": "Development Assistant",
+  "description": "AI assistant for software development tasks",
+  "version": "1.0.0",
   "capabilities": [
-    {
-      "method": "analyze_task",
-      "description": "Analyze task complexity and requirements",
-      "input_schema": "...",
-      "output_schema": "..."
-    }
+    "code_review",
+    "documentation_generation", 
+    "bug_analysis",
+    "test_generation"
   ],
   "endpoints": {
-    "http": "https://api.nexusai.com/agents/task-analyzer",
-    "websocket": "wss://api.nexusai.com/agents/task-analyzer/ws"
+    "primary": "https://dev-assistant.nexusai.com/a2a",
+    "websocket": "wss://dev-assistant.nexusai.com/ws"
   },
-  "version": "1.2.0",
-  "supported_protocols": ["a2a-v1", "mcp-v1"],
+  "supported_protocols": ["a2a-v1", "a2a-v2"],
   "authentication": {
     "type": "oauth2",
-    "scopes": ["read:tasks", "write:analysis"]
+    "token_endpoint": "https://auth.nexusai.com/token"
   }
 }
 ```
 
-#### Registry Service
-- Central directory of available agents
-- Dynamic registration and deregistration
-- Health monitoring and status updates
-- Capability search and filtering
+### Communication Patterns
 
-### 4. Security Model
+#### 1. Request-Response Pattern
+Synchronous communication for immediate results:
 
-#### OAuth 2.1 / OpenID Connect
-- Industry-standard authentication and authorization
-- JWT tokens for secure agent identification
-- Scope-based access control
-- Token refresh and revocation support
-
-#### Agent Identity
-- Unique agent identifiers
-- Digital certificates for agent verification
-- Cryptographic signatures for message integrity
-- Mutual TLS for secure transport
-
-#### Access Control
 ```json
 {
-  "agent_permissions": {
-    "allowed_agents": ["data-processor-*", "report-generator"],
-    "restricted_methods": ["delete_data", "modify_config"],
-    "rate_limits": {
-      "requests_per_minute": 100,
-      "burst_capacity": 20
-    }
+  "method": "agent.analyze.code",
+  "params": {
+    "source_code": "function example() { ... }",
+    "language": "javascript",
+    "analysis_type": "quality"
   }
 }
 ```
 
-## Communication Patterns
+#### 2. Event-Driven Pattern
+Asynchronous notifications using SSE:
 
-### 1. Direct Invocation
-Simple request-response pattern for immediate results:
-
-```typescript
-const response = await agentClient.invoke({
-  target_agent: "data-processor-v2",
-  method: "process_dataset",
-  params: {
-    dataset_id: "ds_123",
-    processing_type: "normalize"
+```json
+{
+  "event": "task.completed",
+  "data": {
+    "task_id": "task_123",
+    "result": {...},
+    "timestamp": "2024-01-15T10:30:00Z"
   }
-});
+}
 ```
 
-### 2. Asynchronous Tasks
-Long-running operations with progress updates:
+#### 3. Workflow Orchestration Pattern
+Multi-agent collaboration:
 
-```typescript
-const taskId = await agentClient.submitTask({
-  target_agent: "ml-trainer-v1",
-  method: "train_model",
-  params: { config: "..." }
-});
-
-// Subscribe to progress updates
-agentClient.subscribe(`task.${taskId}.progress`, (update) => {
-  console.log(`Training progress: ${update.percentage}%`);
-});
+```json
+{
+  "method": "workflow.execute",
+  "params": {
+    "workflow_id": "code-review-pipeline",
+    "steps": [
+      {
+        "agent": "static-analyzer",
+        "action": "analyze_code",
+        "depends_on": []
+      },
+      {
+        "agent": "security-scanner", 
+        "action": "scan_vulnerabilities",
+        "depends_on": ["static-analyzer"]
+      },
+      {
+        "agent": "documentation-generator",
+        "action": "update_docs",
+        "depends_on": ["static-analyzer", "security-scanner"]
+      }
+    ]
+  }
+}
 ```
 
-### 3. Event-Driven Collaboration
-Reactive workflows based on events:
+## Security Model
 
-```typescript
-// Agent A publishes an event
-agentClient.publish("data.processed", {
-  dataset_id: "ds_123",
-  output_location: "s3://bucket/processed/"
-});
+### Authentication & Authorization
+- **OAuth 2.1** with PKCE for secure authentication
+- **OpenID Connect** for identity verification
+- **JWT tokens** for session management
+- **mTLS** for service-to-service communication
 
-// Agent B subscribes and reacts
-agentClient.subscribe("data.processed", async (event) => {
-  await generateReport(event.output_location);
-});
+### Security Considerations (NEX-789)
+
+#### Authentication Options
+1. **OAuth 2.1 + PKCE**
+   - Most secure for client-to-agent communication
+   - Prevents authorization code interception
+   - Supports refresh tokens for long-lived sessions
+
+2. **Client Credentials Flow**
+   - Service-to-service authentication
+   - Suitable for backend agent communication
+   - Scoped permissions for specific operations
+
+3. **Mutual TLS (mTLS)**
+   - Certificate-based authentication
+   - Strong identity verification
+   - Network-level security
+
+#### Authorization Framework
+- **Role-Based Access Control (RBAC)**
+- **Attribute-Based Access Control (ABAC)** for complex scenarios
+- **Scope-based permissions** for granular access control
+
+Example scope definitions:
+```
+agent:read          # Read agent capabilities
+agent:execute       # Execute agent methods  
+workflow:create     # Create new workflows
+workflow:monitor    # Monitor workflow execution
+task:assign        # Assign tasks to agents
 ```
 
-## Implementation Guidelines
+### Message Integrity
+- **Digital signatures** using Ed25519 for message authenticity
+- **Message encryption** using AES-256-GCM for sensitive data
+- **Request correlation IDs** for tracking and auditing
 
-### Agent Library Requirements
-- A2A client library implementation
-- Agent card generation and management
-- Security token handling
-- Event subscription management
+## Protocol Methods
 
-### Error Handling
+### Core Agent Methods
+
+#### 1. Capability Discovery
+```json
+{
+  "method": "agent.discover",
+  "params": {
+    "capability_filter": ["code_analysis", "documentation"]
+  }
+}
+```
+
+#### 2. Task Delegation
+```json
+{
+  "method": "agent.delegate",
+  "params": {
+    "target_agent": "specialist-agent-id",
+    "task": {...},
+    "priority": "high",
+    "deadline": "2024-01-15T18:00:00Z"
+  }
+}
+```
+
+#### 3. Status Monitoring
+```json
+{
+  "method": "agent.status",
+  "params": {
+    "agent_id": "target-agent",
+    "include_health": true,
+    "include_workload": true
+  }
+}
+```
+
+### Workflow Methods
+
+#### 1. Workflow Creation
+```json
+{
+  "method": "workflow.create",
+  "params": {
+    "name": "Code Review Pipeline",
+    "description": "Automated code review process",
+    "steps": [...],
+    "triggers": ["pull_request_opened"],
+    "timeout": "30m"
+  }
+}
+```
+
+#### 2. Workflow Execution
+```json
+{
+  "method": "workflow.execute",
+  "params": {
+    "workflow_id": "workflow_123",
+    "input_data": {...},
+    "execution_mode": "async"
+  }
+}
+```
+
+## Error Handling
+
+### Standard Error Codes
+Based on JSON-RPC 2.0 with A2A extensions:
+
+| Code | Message | Description |
+|------|---------|-------------|
+| -32700 | Parse error | Invalid JSON |
+| -32600 | Invalid Request | Malformed request |
+| -32601 | Method not found | Unknown method |
+| -32602 | Invalid params | Invalid parameters |
+| -32603 | Internal error | Server error |
+| -40001 | Agent not found | Target agent unavailable |
+| -40002 | Authorization failed | Insufficient permissions |
+| -40003 | Workflow failed | Workflow execution error |
+| -40004 | Timeout | Request timeout |
+
+### Error Response Format
 ```json
 {
   "jsonrpc": "2.0",
   "error": {
-    "code": -32603,
-    "message": "Internal error",
+    "code": -40001,
+    "message": "Agent not found",
     "data": {
-      "error_type": "processing_failed",
-      "retry_after": 30,
-      "correlation_id": "err_abc123"
+      "agent_id": "missing-agent",
+      "available_agents": ["agent1", "agent2"],
+      "timestamp": "2024-01-15T10:30:00Z"
     }
   },
-  "id": "req_12345"
+  "id": "req_001"
 }
 ```
 
-### Monitoring and Observability
-- Request/response logging with correlation IDs
-- Performance metrics collection
-- Distributed tracing across agent calls
-- Health check endpoints
+## Implementation Guidelines
 
-## Security Considerations (NEX-789)
+### Connection Management
+- **Connection pooling** for efficient resource usage
+- **Automatic reconnection** with exponential backoff
+- **Heartbeat mechanism** for connection health monitoring
+- **Circuit breaker pattern** for fault tolerance
 
-### Authentication Methods
-- **OAuth 2.1**: Recommended for production environments
-- **API Keys**: Suitable for internal agent communication
-- **Mutual TLS**: For high-security scenarios
-- **Custom JWT**: For specific organizational needs
+### Message Routing
+- **Service mesh** integration for traffic management
+- **Load balancing** across agent instances
+- **Message queuing** for reliable delivery
+- **Dead letter queues** for failed messages
 
-### Authorization Patterns
-- **Role-Based Access Control (RBAC)**: Assign roles to agents
-- **Attribute-Based Access Control (ABAC)**: Fine-grained permissions
-- **Capability-Based Security**: Method-level access control
+### Monitoring & Observability
+- **Distributed tracing** using OpenTelemetry
+- **Metrics collection** for performance monitoring
+- **Centralized logging** with correlation IDs
+- **Real-time alerting** for system health
 
-### Data Protection
-- Encryption in transit (TLS 1.3+)
-- Encryption at rest for sensitive data
-- Data anonymization and masking
-- Audit logging for compliance
+## Integration with MCP
 
-### Threat Mitigation
-- Rate limiting and DDoS protection
-- Input validation and sanitization
-- Agent identity verification
-- Secure secret management
+A2A complements MCP by enabling:
+1. **Agent orchestration** - Coordinating multiple MCP-enabled agents
+2. **Workflow automation** - Chaining MCP tool calls across agents
+3. **Load distribution** - Balancing work across agent instances
+4. **Fallback mechanisms** - Routing to alternative agents
 
-## Related Issues
+Example integration:
+```json
+{
+  "method": "agent.mcp.proxy",
+  "params": {
+    "mcp_method": "invoke_method",
+    "mcp_params": {
+      "method": "github.get_issues",
+      "params": {"repo": "nexus/platform"}
+    },
+    "target_agent": "github-specialist"
+  }
+}
+```
 
-- **NEX-789**: Research A2A security models (To Do)
-- Focus on OAuth integration and RBAC implementation
-- Performance testing for high-volume agent interactions 
+## Future Enhancements
+
+1. **GraphQL subscription support** for real-time updates
+2. **gRPC transport** for high-performance communication
+3. **Edge computing** support for distributed agents
+4. **Federated learning** capabilities for collaborative AI
+5. **Blockchain integration** for decentralized agent networks
+
+## Related Research
+
+- **NEX-789**: Investigation into OAuth and security models for A2A
+- **Security whitepaper**: Comprehensive security analysis
+- **Performance benchmarks**: Latency and throughput analysis
+- **Integration patterns**: Best practices for A2A adoption 

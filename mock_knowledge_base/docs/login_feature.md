@@ -1,56 +1,75 @@
 # Login Feature Documentation
 
-This document describes the user login flow and implementation details.
+This document describes the user login flow and related components.
 
 ## Overview
 
-The login feature provides secure user authentication for the NexusAI platform. It supports both desktop and mobile interfaces with responsive design considerations.
+The login feature provides secure authentication for users accessing the NexusAI platform. It supports multiple authentication methods and responsive design across all device types.
 
 ## UI Elements
 
-- **Username field**: Text input for user identification
+### Core Components
+- **Username field**: Text input for user identifier (email or username)
 - **Password field**: Secure password input with visibility toggle
-- **Login Button**: Primary action button (See ui_guidelines.md for styling)
+- **Login Button**: Primary action button to submit credentials (See ui_guidelines.md for styling)
 - **Remember Me**: Optional checkbox for session persistence
 - **Forgot Password**: Link to password recovery flow
 
-## Authentication Flow
-
-1. User enters credentials
-2. Client-side validation
-3. Secure transmission to authentication service
-4. Token generation and storage
-5. Redirect to dashboard
+### Layout
+- Desktop: Two-column layout with branding on left, form on right
+- Tablet: Single column centered layout
+- Mobile: Full-width form with stacked elements
 
 ## Known Issues
+- Login button alignment issue on mobile devices < 480px (NEX-123)
+- Resolved: Button CSS fixed to center properly on mobile screens
 
-- **NEX-123**: Alignment on mobile devices (screens < 480px)
-  - Status: Fixed in commit_abc123
-  - Solution: Centered button with auto margins
+## Authentication Flow
+1. User enters credentials
+2. Frontend validates format
+3. Credentials sent to authentication service
+4. JWT token returned on success
+5. Token stored securely for subsequent API calls
 
-## Security Considerations
+## Related Files
+- `ui_guidelines.md` - Design system and component styling
+- `commit_abc123` - Mobile alignment fix implementation
 
-- Passwords are hashed using bcrypt
-- HTTPS required for all authentication endpoints
-- Session tokens expire after 24 hours
-- Rate limiting applied to prevent brute force attacks
+## Security Features
+- Password strength validation
+- Rate limiting on failed attempts
+- CSRF protection
+- Secure session management
 
-## Mobile Responsiveness
+## Related Components
+- Authentication service API
+- User management system
+- Session storage
+- Password recovery system
 
-The login form adapts to different screen sizes:
-- Desktop: Standard two-column layout
-- Tablet: Single column with increased spacing
-- Mobile: Compact layout with touch-friendly controls
+## UI Guidelines Reference
+For detailed styling specifications, see ui_guidelines.md including:
+- Button styling standards
+- Form layout patterns
+- Mobile responsive design
+- Color scheme and typography
+
+## Accessibility
+
+- WCAG 2.1 AA compliant
+- Screen reader support
+- Keyboard navigation
+- High contrast mode support
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
 ## Testing
 
-- Unit tests cover validation logic
-- Integration tests verify authentication flow
-- Cross-browser compatibility tested on major browsers
-- Mobile testing on iOS and Android devices
-
-## Related Documents
-
-- [UI Guidelines](ui_guidelines.md)
-- [Security Specifications](security_spec.md)
-- [API Documentation](api_docs.md) 
+Unit tests: `/tests/components/LoginForm.test.ts`
+E2E tests: `/tests/e2e/login.spec.ts`
+Security tests: `/tests/security/auth.test.ts` 

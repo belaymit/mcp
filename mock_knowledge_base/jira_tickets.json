@@ -1,5 +1,6 @@
 [
   {
+    "id": "NEX-123",
     "ticket_id": "NEX-123",
     "summary": "Fix login button alignment on mobile",
     "description": "The login button is slightly off-center on screens smaller than 480px.",
@@ -7,9 +8,13 @@
     "assignee": "dev_a",
     "reporter": "qa_b",
     "code_refs": ["commit_abc123", "PR #45"],
-    "doc_refs": ["ui_guidelines.md", "login_feature.md"]
+    "doc_refs": ["ui_guidelines.md", "login_feature.md"],
+    "created": "2024-01-15T10:30:00Z",
+    "updated": "2024-01-20T14:45:00Z",
+    "priority": "Medium"
   },
   {
+    "id": "NEX-456",
     "ticket_id": "NEX-456",
     "summary": "Implement MCP server for Task API",
     "description": "Wrap the internal Task Management API with an MCP server.",
@@ -17,9 +22,13 @@
     "assignee": "protocol_eng_c",
     "reporter": "lead_eng",
     "code_refs": ["commit_def456", "PR #52"],
-    "doc_refs": ["mcp_server_design.md", "task_api_spec.md"]
+    "doc_refs": ["mcp_server_design.md", "task_api_spec.md"],
+    "created": "2024-01-18T09:15:00Z",
+    "updated": "2024-01-25T16:20:00Z",
+    "priority": "High"
   },
   {
+    "id": "NEX-789",
     "ticket_id": "NEX-789",
     "summary": "Research A2A security models",
     "description": "Investigate OAuth and other options for securing agent communication.",
@@ -27,6 +36,9 @@
     "assignee": null,
     "reporter": "arch_d",
     "code_refs": [],
-    "doc_refs": ["a2a_spec.md"]
+    "doc_refs": ["a2a_spec.md"],
+    "created": "2024-01-22T13:45:00Z",
+    "updated": "2024-01-30T11:30:00Z",
+    "priority": "Low"
   }
 ] 

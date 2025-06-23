@@ -1,108 +1,135 @@
-# UI Guidelines
+# UI Guidelines Documentation
 
-This document outlines the design standards and guidelines for the NexusAI platform interface.
+This document defines the design standards and component guidelines for the NexusAI platform.
 
-## Design Principles
+## Design System Overview
 
-1. **Consistency**: Maintain uniform patterns across all components
-2. **Accessibility**: Ensure usability for all users including those with disabilities
-3. **Responsiveness**: Adapt seamlessly to different screen sizes and devices
-4. **Performance**: Optimize for fast loading and smooth interactions
-
-## Color Palette
-
-### Primary Colors
-- **Primary Blue**: #007bff (Brand color for primary actions)
-- **Secondary Gray**: #6c757d (Supporting text and secondary actions)
-- **Success Green**: #28a745 (Success states and confirmations)
-- **Warning Orange**: #ffc107 (Warnings and alerts)
-- **Danger Red**: #dc3545 (Errors and destructive actions)
-
-### Neutral Colors
-- **Dark**: #343a40 (Primary text)
-- **Light**: #f8f9fa (Background)
-- **White**: #ffffff (Card backgrounds)
+Our design system ensures consistency, accessibility, and user-friendly interfaces across all platform components.
 
 ## Typography
 
 ### Font Family
-- Primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif
-- Monospace: 'Fira Code', 'Courier New', monospace
+- Primary: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI'
+- Monospace: 'Fira Code', 'Monaco', 'Consolas', monospace
 
 ### Font Sizes
-- **Heading 1**: 2.5rem (40px)
-- **Heading 2**: 2rem (32px)
-- **Heading 3**: 1.75rem (28px)
-- **Body Large**: 1.125rem (18px)
-- **Body**: 1rem (16px)
-- **Small**: 0.875rem (14px)
+- **Heading 1**: 32px (2rem) - Page titles
+- **Heading 2**: 28px (1.75rem) - Section headers
+- **Heading 3**: 24px (1.5rem) - Subsection headers
+- **Body Large**: 18px (1.125rem) - Important content
+- **Body**: 16px (1rem) - Default text
+- **Body Small**: 14px (0.875rem) - Secondary content
+- **Caption**: 12px (0.75rem) - Labels, metadata
 
-## Button Styles
+## Color Palette
 
-### Primary Button
+### Primary Colors
+- **Primary Blue**: #2563eb
+- **Primary Blue Hover**: #1d4ed8
+- **Primary Blue Light**: #dbeafe
+
+### Neutral Colors
+- **Text Primary**: #111827
+- **Text Secondary**: #6b7280
+- **Text Muted**: #9ca3af
+- **Background**: #ffffff
+- **Background Alt**: #f9fafb
+- **Border**: #e5e7eb
+
+### Semantic Colors
+- **Success**: #10b981
+- **Warning**: #f59e0b
+- **Error**: #ef4444
+- **Info**: #3b82f6
+
+## Components
+
+### Button Styles
+
+#### Primary Button
 ```css
 .btn-primary {
-  background-color: #007bff;
-  border: 1px solid #007bff;
+  background-color: #2563eb;
   color: white;
   padding: 12px 24px;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
 }
 ```
 
-### Mobile Button Adjustments
-- Minimum height: 44px (touch target)
-- Padding: 12px 16px
-- Font-size: 16px (prevents zoom on iOS)
+#### Mobile Responsive Button (Fixed in NEX-123)
+```css
+@media (max-width: 480px) {
+  .btn-primary {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+}
+```
 
-## Spacing System
+### Input Fields
+```css
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
 
-Based on 8px grid system:
+.input-field:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+```
+
+## Layout Guidelines
+
+### Spacing Scale
 - **xs**: 4px
 - **sm**: 8px
 - **md**: 16px
 - **lg**: 24px
 - **xl**: 32px
-- **xxl**: 48px
+- **2xl**: 48px
+- **3xl**: 64px
 
-## Breakpoints
-
+### Breakpoints
 - **Mobile**: < 768px
 - **Tablet**: 768px - 1024px
 - **Desktop**: > 1024px
 
-## Component Guidelines
+## Accessibility
 
-### Login Button (NEX-123 Reference)
-- Desktop: Standard width with left alignment
-- Mobile: Full width (90% with max-width 300px) and center alignment
-- Height: 48px minimum for touch accessibility
-- Border-radius: 4px for consistency
+### WCAG 2.1 AA Compliance
+- Minimum contrast ratio of 4.5:1 for normal text
+- Minimum contrast ratio of 3:1 for large text
+- All interactive elements must be keyboard accessible
+- Screen reader compatible semantic markup
 
-### Form Elements
-- Input height: 40px minimum
-- Label positioning: Above input field
-- Error messages: Below input with red color
-- Focus states: Blue border with box-shadow
+### Focus States
+All interactive elements must have visible focus indicators with high contrast.
 
-## Accessibility Standards
+## Implementation Notes
 
-- WCAG 2.1 AA compliance
-- Minimum contrast ratio: 4.5:1 for normal text, 3:1 for large text
-- Keyboard navigation support
-- Screen reader compatibility
-- Focus indicators clearly visible
+### Login Button Mobile Fix (NEX-123)
+The login button alignment issue on mobile screens < 480px has been resolved by:
+1. Adding `margin-left: auto` and `margin-right: auto`
+2. Setting `display: block` for proper centering
+3. Ensuring full-width behavior on mobile devices
 
-## Related Issues
-
-- **NEX-123**: Mobile login button alignment fixed
-- Focus on responsive design improvements ongoing 
+## Related Documents
+- `login_feature.md` - Specific implementation of login UI components 
